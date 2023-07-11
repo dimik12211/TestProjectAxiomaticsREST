@@ -7,7 +7,7 @@ import org.hibernate.Transaction;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class DAOJson {
+public class DAO_Person {
 
     private Session session = HibernateSession.getSessionFactory();
 
@@ -18,6 +18,16 @@ public class DAOJson {
             transaction.commit();
         } catch (Exception e) {
             e.getStackTrace();
+        }
+    }
+
+    public void update(Person person){
+        try {
+            Transaction transaction = session.beginTransaction();
+            session.update(person);
+            transaction.commit();
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 }
