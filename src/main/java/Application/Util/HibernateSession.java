@@ -1,6 +1,7 @@
 package Application.Util;
 
 import Application.Model.Person;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -28,7 +29,7 @@ public class HibernateSession {
                         .setProperty(Environment.HBM2DDL_AUTO, "update");
                 sessionFactory = configuration.buildSessionFactory();
             }
-        } catch (Exception e) {
+        } catch (HibernateException e) {
             e.printStackTrace();
         }
         return sessionFactory.openSession();

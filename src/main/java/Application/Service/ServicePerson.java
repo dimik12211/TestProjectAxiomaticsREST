@@ -1,17 +1,21 @@
 package Application.Service;
 
-import Application.DAO.DAO_Person;
+import Application.DAO.DAOPerson;
 import Application.Model.Person;
 import org.json.JSONObject;
 import org.json.XML;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ServicePerson {
 
+    Logger logger = LoggerFactory.getLogger(ServicePerson.class);
+
     @Autowired
-    private DAO_Person daoPerson;
+    private DAOPerson daoPerson;
 
     private final String soapRequestStart = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" " +
             "xmlns:prod=\"http://www.example.org/Application/producingwebservice\">\n<soapenv:Header/>\n<soapenv:Body>\n<prod:getCountryRequest>\n<prod:xml>\n";
@@ -24,17 +28,27 @@ public class ServicePerson {
 
     public void save(Person person) {
         try {
+            if (person.getJson() == null || person.getJson().equals("{}")) {
+                throw new IllegalStateException("При сохранении Json пуст");
+            }
             daoPerson.save(person);
-        } catch (Exception e) {
-            e.printStackTrace();
+            logger.info("Сохранение в БД успешно (Service)");
+        } catch (IllegalStateException e) {
+            logger.error("Ошибка сохранения в БД (Service): " + e.getMessage());
+            throw e;
         }
     }
 
-    public void update(Person person){
+    public void update(Person person) {
         try {
+            if (person.getXml() == null || person.getXml().equals("{}") || person.getJson() == null || person.getJson().equals("{}")) {
+                throw new IllegalStateException("При обновлении XML и/или Json пуст");
+            }
             daoPerson.update(person);
-        }catch (Exception e){
-            e.printStackTrace();
+            logger.info("Обновление в БД успешно (Service)");
+        } catch (Exception e) {
+            logger.error("Ошибка обновления в БД (Service): " + e.getMessage());
+            throw e;
         }
     }
 
@@ -45,7 +59,7 @@ public class ServicePerson {
         return xml;
     }
 
-    public String xmlResponse(String xml){
+    public String xmlResponse(String xml) {
         try {
             xml = xml.replace("&lt;", "<");
             xml = xml.replace("&gt;", ">");
@@ -59,15 +73,17 @@ public class ServicePerson {
                     xml = xml.substring(0, i);
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return xml;
     }
 
-    public StringBuffer stringBufferCreate(String xml){
-        StringBuffer buffer = new StringBuffer();
-        buffer.append(soapRequestStart + xml + soapRequestEnd);
-        return buffer;
+    public StringBuffer stringBufferCreate(String xml) {
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append(soapRequestStart);
+        stringBuffer.append(xml);
+        stringBuffer.append(soapRequestEnd);
+        return stringBuffer;
     }
 }
