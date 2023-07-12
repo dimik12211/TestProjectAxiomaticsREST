@@ -46,7 +46,7 @@ public class ServicePerson {
             }
             daoPerson.update(person);
             logger.info("Обновление в БД успешно (Service)");
-        } catch (Exception e) {
+        } catch (IllegalStateException e) {
             logger.error("Ошибка обновления в БД (Service): " + e.getMessage());
             throw e;
         }
